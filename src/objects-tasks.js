@@ -101,8 +101,13 @@ function compareObjects(obj1, obj2) {
  *    isEmptyObject({}) => true
  *    isEmptyObject({a: 1}) => false
  */
-function isEmptyObject(/* obj */) {
-  throw new Error('Not implemented');
+function isEmptyObject(obj) {
+  let result = true;
+  const arr = Object.keys(obj);
+  if (Array.prototype.includes.call(arr, arr[0])) {
+    result = false;
+  }
+  return result;
 }
 
 /**
