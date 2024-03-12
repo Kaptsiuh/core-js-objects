@@ -208,8 +208,8 @@ function sellTickets(queue) {
 function Rectangle(width, height) {
   this.width = width;
   this.height = height;
-  this.getArea = function () {
-    return width * height;
+  this.getArea = function getArea() {
+    return this.width * this.height;
   };
 }
 
@@ -396,32 +396,69 @@ function group(array, keySelector, valueSelector) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  value: '',
+
+  element(value) {
+    const order = 0;
+    const containsElement = 'Element';
+    return this.create(value, order, containsElement);
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    const order = 1;
+    const containsElement = 'Id';
+    return this.create(`#${value}`, order, containsElement);
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    const order = 2;
+    return this.create(`.${value}`, order, null);
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    const order = 3;
+    return this.create(`[${value}]`, order, null);
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    const order = 4;
+    return this.create(`:${value}`, order, null);
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    const order = 5;
+    const containsElement = 'PseudoElement';
+    return this.create(`::${value}`, order, containsElement);
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    const combinedValue = `${selector1.value} ${combinator} ${selector2.value}`;
+    return { ...this, value: combinedValue };
+  },
+
+  create(value, order, element) {
+    if (order < this.order) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    if (this[element]) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
+    const newObject = {
+      ...this,
+      value: this.value + value,
+      order,
+    };
+    Object.setPrototypeOf(newObject, this);
+    newObject[element] = element ? true : undefined;
+    return newObject;
+  },
+
+  stringify() {
+    return this.value;
   },
 };
 
